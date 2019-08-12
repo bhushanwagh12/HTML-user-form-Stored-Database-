@@ -1,0 +1,112 @@
+admin.py
+========================================
+from django.contrib import admin
+from .models import ContactData
+
+admin.site.register(ContactData)
+
+
+views.py
+=================================
+
+from django.shortcuts import render
+from django.http import HttpResponse
+from .forms import ContactForm
+from .models import ContactData
+
+def ContactView(request):
+    if request.method=='POST':
+        cform=ContactForm(request.POST)
+        if cform.is_valid():
+            name1=request.POST.get('name','')
+            salary1=request.POST.get('salary','')
+            email1=request.POST.get('email','')
+            city1=request.POST.get('city','')
+            data=ContactData(
+                name=name1,
+                salary=salary1,
+                email=email1,
+                city=city1,
+            )
+            data.save()
+            cform=ContactForm()
+            return render(request,'contact.html',{'abc':cform})
+        else:
+            return HttpResponse("Invalid Form")
+    else:
+        cform=ContactForm()
+        return render(request,'contact.html',{'abc':cform})
+
+
+
+
+--------------------------------------------------------------------------------------
+contact.html
+=======================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact Form</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+    <div class="offset-md-4 col-md-4">
+        <form method="post">
+            {% csrf_token %}
+            {{ abc }} <br>
+            <input type="submit" value="submit">
+            <input type="Reset" value="clear">
+        </form>
+    </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+---------------------------------------------------------------------------
+urls.py
+=====================
+from django.contrib import admin
+from django.urls import path
+from durga_app import views
+
+urlpatterns = [
+    path('',views.ContactView),
+    path('admin/', admin.site.urls),
+]
+
+
+--------------------------------------------------------------------
+
+forms.py
+==================
+from django import forms
+
+class ContactForm(forms.Form):
+    name=forms.CharField(max_length=50)
+    salary=forms.FloatField()
+    email=forms.EmailField(max_length=100)
+    city=forms.CharField(max_length=40)
+
+to create html page after forms.py file and run command python manage.py shell
+-------------------------------
+from durga_app.forms import bhushan
+>>> c=bhushan()
+>>> print(c)
+
+
+models.py
+=====================
+from django.db import models
+
+class ContactData(models.Model):
+    name=models.CharField(max_length=20)
+    salary=models.FloatField()
+    email=models.EmailField(max_length=20)
+    city=models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
